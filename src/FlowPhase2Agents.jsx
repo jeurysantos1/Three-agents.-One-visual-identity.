@@ -131,21 +131,17 @@ Respond in your Brand Designer voice — technical, precise, with specific value
 const SYNTHESIS_SYSTEM = `You are the Lead Creative Producer synthesizing all Phase 2 kickoff work into one unified actionable brief. Be comprehensive but decisive. This document will be handed to the team to build the deck.`;
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
-async function callClaude(systemPrompt, userMessage, onChunk) {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
-  if (!apiKey || apiKey === "sk-ant-api03-your-key-here") {
-    // Demo mode — stream placeholder text
-    const demo = `## Demo Mode — API Key Not Set\n\nTo see real agent output:\n1. Copy \`.env.example\` to \`.env.local\`\n2. Add your Anthropic API key\n3. Restart the dev server\n\nGet your key at **console.anthropic.com**\n\nThis agent would normally generate a full creative brief based on the Flow brand foundation and Phase 1 output.`;
-    const words = demo.split(" ");
-    let acc = "";
-    for (let i = 0; i < words.length; i++) {
-      acc += (i > 0 ? " " : "") + words[i];
-      onChunk(acc);
-      await new Promise((r) => setTimeout(r, 30));
-    }
-    return demo;
-  }
+const apiKey = (typeof import.meta !== "undefined" && import.meta.env?.VITE_ANTHROPIC_API_KEY) || "";
+
+const response = await fetch("https://api.anthropic.com/v1/messages", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    ...(apiKey ? { "x-api-key": apiKey } : {}),
+    "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-access": "true",
+  },
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
