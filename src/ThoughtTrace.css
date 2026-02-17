@@ -1,57 +1,102 @@
+
 /* ─────────────────────────────────────────────────────────────────────────────
-   THOUGHTTRACE — Styles
-   Self-contained. Drop into any project alongside ThoughtTrace.jsx
+   THOUGHTTRACE — Material Design 3 (You)
+   Fluid, elevated, expressive. Follows MD3 motion, shape, and state layers.
+   Token references: https://m3.material.io/foundations/design-tokens
    ───────────────────────────────────────────────────────────────────────────── */
 
+/* ── MD3 LOCAL TOKENS ────────────────────────────────────────────────────────
+   Scoped to .tt-root so they don't bleed into parent styles.              */
+
 .tt-root {
+  --md-sys-shape-corner-small:        8px;
+  --md-sys-shape-corner-medium:       12px;
+  --md-sys-shape-corner-large:        16px;
+  --md-sys-shape-corner-full:         50px;
+
+  --md-sys-motion-duration-short1:    50ms;
+  --md-sys-motion-duration-short2:    100ms;
+  --md-sys-motion-duration-medium1:   200ms;
+  --md-sys-motion-duration-medium2:   300ms;
+  --md-sys-motion-duration-long:      500ms;
+
+  --md-sys-motion-easing-standard:    cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-decelerate:  cubic-bezier(0, 0, 0, 1);
+  --md-sys-motion-easing-accelerate:  cubic-bezier(0.3, 0, 1, 1);
+  --md-sys-motion-easing-emphasized:  cubic-bezier(0.2, 0, 0, 1);
+
+  /* State layer opacities per MD3 spec */
+  --md-sys-state-hover-opacity:       0.08;
+  --md-sys-state-pressed-opacity:     0.12;
+  --md-sys-state-focus-opacity:       0.12;
+
+  /* Surface tones */
+  --tt-surface:                       rgba(255, 255, 255, 0.0);
+  --tt-surface-container:             rgba(0, 0, 0, 0.04);
+  --tt-surface-container-high:        rgba(0, 0, 0, 0.07);
+  --tt-on-surface:                    #1C1B1F;
+  --tt-on-surface-variant:            #49454F;
+  --tt-outline-variant:               rgba(0, 0, 0, 0.12);
+
   width: 100%;
 }
 
-/* ── HEADER ─────────────────────────────────────────────────────────────────── */
+/* ── HEADER ──────────────────────────────────────────────────────────────────
+   MD3: Label Small — 11sp / 0.5 tracking / medium weight                  */
 
 .tt-header {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 10px;
-  padding: 0 4px;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+  min-height: 24px;
 }
 
 .tt-header-dot {
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
+  opacity: 0.7;
+  transition: opacity var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
 }
 
 .tt-header-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #888888;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--tt-on-surface-variant);
+  text-transform: none;
 }
 
 .tt-header-badge {
   margin-left: auto;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  transition:
+    background var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
+    color      var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
 }
 
 .tt-badge-done {
-  color: #AAAAAA;
+  color: var(--tt-on-surface-variant);
+  background: var(--tt-surface-container);
 }
 
 .tt-badge-live {
-  animation: tt-pulse 1.2s infinite;
+  background: var(--tt-surface-container);
+  animation: tt-live-pulse 2s var(--md-sys-motion-easing-standard) infinite;
 }
 
-@keyframes tt-pulse {
+@keyframes tt-live-pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.35; }
+  50%       { opacity: 0.45; }
 }
 
-/* ── STEP LIST ──────────────────────────────────────────────────────────────── */
+/* ── STEP LIST ───────────────────────────────────────────────────────────────
+   MD3: List items follow 56dp touch target, 16dp horizontal padding       */
 
 .tt-list {
   list-style: none;
@@ -59,59 +104,123 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
+/* ── STEP ITEM ───────────────────────────────────────────────────────────── */
+
 .tt-step {
-  border-radius: 7px;
+  border-radius: var(--md-sys-shape-corner-medium);
   overflow: hidden;
-  transition: background 0.2s;
+  position: relative;
+  /* MD3 container transform on state change */
+  transition:
+    background var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
+    transform   var(--md-sys-motion-duration-short2)  var(--md-sys-motion-easing-emphasized);
 }
 
 .tt-step--active {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--tt-surface-container);
 }
 
-/* ── ROW BUTTON ─────────────────────────────────────────────────────────────── */
+.tt-step--done:not(.tt-step--active) {
+  background: transparent;
+}
+
+.tt-step--locked {
+  pointer-events: none;
+}
+
+/* ── ROW BUTTON ──────────────────────────────────────────────────────────────
+   MD3: Uses state layer (pseudo-element) instead of background change.    */
 
 .tt-row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
   width: 100%;
+  min-height: 44px;
   background: none;
   border: none;
-  padding: 6px 4px;
+  padding: 8px 10px 8px 8px;
   text-align: left;
-  border-radius: 7px;
-  transition: background 0.15s;
+  border-radius: var(--md-sys-shape-corner-medium);
   font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  /* MD3 standard easing for interaction feedback */
+  transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  overflow: hidden;
 }
 
-.tt-row:not(:disabled):hover {
-  background: rgba(0, 0, 0, 0.04);
-  cursor: pointer;
+/* MD3 state layer — overlay on hover/press */
+.tt-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+}
+
+.tt-row:not(:disabled):hover::before {
+  opacity: var(--md-sys-state-hover-opacity);
+}
+
+.tt-row:not(:disabled):active::before {
+  opacity: var(--md-sys-state-pressed-opacity);
+}
+
+.tt-row:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .tt-row:disabled {
   cursor: default;
 }
 
-/* ── ICON ───────────────────────────────────────────────────────────────────── */
+/* ── LEADING ICON ────────────────────────────────────────────────────────────
+   MD3: 24dp icon container, circular shape, elevation surface tones       */
 
 .tt-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--md-sys-shape-corner-full);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.3s, color 0.3s;
+  /* MD3 container color transitions use medium1 duration */
+  transition:
+    background  var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
+    color       var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
+    transform   var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized),
+    box-shadow  var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+}
+
+/* Scale up the active icon slightly — MD3 expressive motion */
+.tt-step--active .tt-icon {
+  transform: scale(1.1);
+}
+
+/* Done icon gets a subtle pop when it first completes */
+.tt-step--done .tt-icon {
+  transform: scale(1);
+  animation: tt-icon-complete var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-decelerate);
+}
+
+@keyframes tt-icon-complete {
+  0%   { transform: scale(0.7); opacity: 0.5; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .tt-check {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
 }
@@ -120,44 +229,56 @@
   font-size: 9px;
   font-weight: 600;
   line-height: 1;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
-/* ── SPINNER ────────────────────────────────────────────────────────────────── */
+/* ── MD3 CIRCULAR PROGRESS SPINNER ──────────────────────────────────────────
+   Matches Material's determinate/indeterminate circular indicator style.  */
 
 .tt-spinner {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--md-sys-shape-corner-full);
   border: 1.5px solid currentColor;
   border-top-color: transparent;
-  animation: tt-spin 0.65s linear infinite;
+  animation: tt-spin 0.7s linear infinite;
 }
 
 @keyframes tt-spin {
   to { transform: rotate(360deg); }
 }
 
-/* ── LABEL ──────────────────────────────────────────────────────────────────── */
+/* ── LABEL TEXT ──────────────────────────────────────────────────────────────
+   MD3: Body Medium — 14sp / 0.25 tracking / regular weight                */
 
 .tt-label {
   flex: 1;
-  font-size: 11px;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  transition: color 0.3s, font-weight 0.2s;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.025em;
+  color: var(--tt-on-surface);
+  transition:
+    color       var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
+    font-weight var(--md-sys-motion-duration-short2)  var(--md-sys-motion-easing-standard),
+    opacity     var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+}
+
+.tt-step--active .tt-label {
+  font-weight: 500;
 }
 
 .tt-step--locked .tt-label {
-  opacity: 0.4;
+  opacity: 0.38; /* MD3 disabled content opacity */
 }
 
 .tt-step--locked .tt-icon {
-  opacity: 0.5;
+  opacity: 0.38;
 }
 
-/* ── ANIMATED DOTS ──────────────────────────────────────────────────────────── */
+/* ── ANIMATED ELLIPSIS ───────────────────────────────────────────────────────
+   Fluid wave animation — staggered, not blink                             */
 
 .tt-ellipsis {
   display: inline;
@@ -165,56 +286,91 @@
 }
 
 .tt-ellipsis span {
-  animation: tt-dot 1.2s infinite;
+  display: inline-block;
+  animation: tt-wave 1.4s var(--md-sys-motion-easing-standard) infinite;
   opacity: 0;
 }
 
 .tt-ellipsis span:nth-child(1) { animation-delay: 0.0s; }
-.tt-ellipsis span:nth-child(2) { animation-delay: 0.2s; }
-.tt-ellipsis span:nth-child(3) { animation-delay: 0.4s; }
+.tt-ellipsis span:nth-child(2) { animation-delay: 0.15s; }
+.tt-ellipsis span:nth-child(3) { animation-delay: 0.3s; }
 
-@keyframes tt-dot {
-  0%, 100% { opacity: 0; }
-  50%       { opacity: 1; }
+@keyframes tt-wave {
+  0%,  60%, 100% { opacity: 0;   transform: translateY(0px);  }
+  30%            { opacity: 1;   transform: translateY(-2px); }
 }
 
-/* ── CHEVRON ────────────────────────────────────────────────────────────────── */
+/* ── TRAILING CHEVRON ────────────────────────────────────────────────────────
+   MD3: Trailing icon, 24dp, uses emphasized easing on rotation            */
 
 .tt-chevron {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 400;
   line-height: 1;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  opacity: 0.7;
+  transition:
+    transform var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized),
+    opacity   var(--md-sys-motion-duration-short2)  var(--md-sys-motion-easing-standard);
 }
 
-/* ── EXPANDED DETAIL ────────────────────────────────────────────────────────── */
+.tt-row:hover .tt-chevron {
+  opacity: 1;
+}
+
+/* ── EXPANDED DETAIL PANEL ───────────────────────────────────────────────────
+   MD3: Surface container, 16dp padding, decelerate easing on expand       */
 
 .tt-detail {
   display: flex;
-  gap: 10px;
-  padding: 8px 8px 10px 33px;
-  background: rgba(0, 0, 0, 0.025);
-  border-radius: 0 0 7px 7px;
-  animation: tt-expand 0.15s ease;
+  gap: 12px;
+  margin: 0 4px 4px;
+  padding: 12px 14px 14px 20px;
+  background: var(--tt-surface-container);
+  border-radius: 0 0 var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium);
+  animation: tt-expand var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-decelerate);
+  transform-origin: top center;
 }
 
 @keyframes tt-expand {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity:   0;
+    transform: scaleY(0.85) translateY(-6px);
+  }
+  to {
+    opacity:   1;
+    transform: scaleY(1) translateY(0);
+  }
 }
 
+/* Left accent bar — uses accent color passed via inline style */
 .tt-detail-accent {
   width: 2px;
   border-radius: 2px;
   flex-shrink: 0;
   align-self: stretch;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
+/* MD3: Body Small — 12sp / 0.4 tracking */
 .tt-detail-text {
-  font-size: 11px;
-  line-height: 1.7;
-  color: #666666;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--tt-on-surface-variant);
   margin: 0;
+}
+
+/* ── RIPPLE (MD3 touch feedback) ─────────────────────────────────────────────
+   Lightweight ripple on click without a JS library.                       */
+
+.tt-row:not(:disabled):active {
+  animation: tt-ripple var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+}
+
+@keyframes tt-ripple {
+  0%   { background: rgba(0,0,0,0.0); }
+  30%  { background: rgba(0,0,0,0.06); }
+  100% { background: rgba(0,0,0,0.0); }
 }
