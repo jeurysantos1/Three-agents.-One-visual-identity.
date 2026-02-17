@@ -1,5 +1,3 @@
-# Three-agents.-One-visual-identity.
-Agent Coordination System — three specialized agents that talk to each other before producing art.
 # 🌊 Flow — Phase 2 Agent System
 
 > **Multi-agent AI creative pipeline for brand identity work.**  
