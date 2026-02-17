@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ThoughtTrace, useThoughtTrace } from "./ThoughtTrace";
 import "./FlowPhase2Agents.css";
@@ -306,27 +305,19 @@ function openCoWorking() {
   };
 
   function buildSnapshot() {
-  // Replace these with YOUR actual variables if names differ:
-  // - userPrompt (or whatever holds the user input)
-  // - outputs (or your output states)
   return {
     inputs: {
-      userPrompt: userPrompt || "", // <-- update if your variable name differs
-      agentConfig: { /* optional */ },
+      brandContext: BRAND_CONTEXT,
+      agents: AGENTS,
+      synthesisSystem: SYNTHESIS_SYSTEM,
     },
-    outputs: {
-      artDirector: agentOutputs?.artDirector || "",
-      brandStrategist: agentOutputs?.brandStrategist || "",
-      brandDesigner: agentOutputs?.brandDesigner || "",
-      synthesizer: agentOutputs?.synthesizer || "",
-      systemOutput: outputLocked || output || "", // or wherever your “system/synthesis” lives
-    },
-    messages: messages || [],
-    synthesis: {
-      decisions: [], // optional; you can later parse messages into decisions
-      rationale: "",
-      nextSteps: [],
-    },
+    outputs: { ...outputs },
+    statuses: { ...statuses },
+    phase,
+    activeAgent,
+    messages: [...messages],
+    thinkSteps: JSON.parse(JSON.stringify(thinkSteps || {})),
+    expandedOutput: { ...(expandedOutput || {}) },
   };
 }
 
@@ -434,8 +425,29 @@ function openCoWorking() {
         </div>
         <div className="phase-pill">Phase 02 — Visual Identity</div>
         <button className="launch-btn" onClick={runPipeline} disabled={phase === "running" || phase === "synthesis"}>
-          {phase === "idle" ? "▶ LAUNCH AGENTS" : phase === "running" ? "⟳ AGENTS WORKING..." : phase === "synthesis" ? "⟳ SYNTHESIZING..." : "↺ RE-RUN PIPELINE"}
-        </button>
+          {phase === "idle" ? "▶ LAUNCH AGENTS" : phase === "running" ? "⟳ AGENTS WORKING..." : phase === "synthesis" ? "⟳ SYNTHESIZING..." : "↺ RE-RUN PIPELINE"}</button>
+
+        <div className="version-actions">
+          <button
+            className="version-btn"
+            type="button"
+            onClick={() => setSaveOpen(true)}
+            disabled={phase === "running" || phase === "synthesis"}
+            title="Save the current outputs + system state as a version"
+          >
+            💾 Save
+          </button>
+
+          <button
+            className="version-btn"
+            type="button"
+            onClick={() => setVersionsOpen(true)}
+            title="Open saved versions"
+          >
+            🗂 Versions{approvedVersion ? " • Approved" : ""}
+          </button>
+        </div>
+
       </header>
 
       {/* PIPELINE BAR */}
@@ -673,6 +685,47 @@ function openCoWorking() {
         accent={AGENTS.artDirector?.color || "#B8FF47"}
       />
 
+      {/* VERSIONS (Save + Approve + Resume) */}
+      <SaveVersionModal
+        open={saveOpen}
+        onClose={() => setSaveOpen(false)}
+        defaultName={
+          statuses.synthesizer === "done"
+            ? "Phase 2 Master Brief — baseline"
+            : `Draft — ${new Date().toLocaleDateString()}`
+        }
+        onSave={({ name, notes, approve }) => {
+          const v = saveDraft({ name, notes, snapshot: buildSnapshot() });
+          setSaveOpen(false);
+          if (approve) approveVersion(v.id);
+        }}
+      />
+
+      <VersionsDrawer
+        open={versionsOpen}
+        onClose={() => setVersionsOpen(false)}
+        versions={versions}
+        approvedVersionId={approvedVersion?.id || null}
+        onLoad={(v) => {
+          if (!v) return;
+
+          if (v.outputs) setOutputs(v.outputs);
+          if (v.statuses) setStatuses(v.statuses);
+
+          setPhase(v.phase || "idle");
+          setActive(typeof v.activeAgent !== "undefined" ? v.activeAgent : null);
+
+          if (Array.isArray(v.messages)) setMessages(v.messages);
+          if (v.thinkSteps) setThinkSteps(v.thinkSteps);
+          if (v.expandedOutput) setExpandedOutput(v.expandedOutput);
+
+          setError(null);
+          setVersionsOpen(false);
+        }}
+        onApprove={(id) => approveVersion(id)}
+        onDelete={(id) => deleteVersion(id)}
+        onExport={() => exportJson()}
+      />
 
     </div>
   );
