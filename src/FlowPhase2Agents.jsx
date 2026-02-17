@@ -2,6 +2,10 @@
 import { useState, useRef } from "react";
 import { ThoughtTrace, useThoughtTrace } from "./ThoughtTrace";
 import "./FlowPhase2Agents.css";
+import CoWorkingFab from "./CoWorkingFab";
+import CoWorkingDrawer from "./CoWorkingDrawer";
+import "./CoWorking.css";
+
 
 // ─── BRAND CONTEXT ────────────────────────────────────────────────────────────
 const BRAND_CONTEXT = `
@@ -252,6 +256,20 @@ export default function FlowPhase2Agents() {
     brandDesigner:   { completed: 0, active: null },
     synthesizer:     { completed: 0, active: null },
   });
+ // ── Human + Co-Working UI state ───────────────────────────────
+
+const [coWorkingOpen, setCoWorkingOpen] = useState(false);
+const [lastSeenMsgId, setLastSeenMsgId] = useState(null);
+
+const unreadCount = (() => {
+  if (!messages.length) return 0;
+  if (!lastSeenMsgId) return messages.length;
+  const idx = messages.findIndex((m) => m.id === lastSeenMsgId);
+  if (idx === -1) return messages.length;
+  return Math.max(0, messages.length - (idx + 1));
+})();
+  // ── Human + Co-Working UI state ───────────────────────────────
+
   const [expandedOutput, setExpandedOutput] = useState({});
 
   const scrollRefs = useRef({});
