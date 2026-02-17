@@ -5,6 +5,10 @@ import "./FlowPhase2Agents.css";
 import CoWorkingFab from "./CoWorkingFab";
 import CoWorkingDrawer from "./CoWorkingDrawer";
 import "./CoWorking.css";
+import { useVersions } from "./useVersions";
+import SaveVersionModal from "./SaveVersionModal";
+import VersionsDrawer from "./VersionsDrawer";
+import "./Versions.css";
 
 
 // ─── BRAND CONTEXT ────────────────────────────────────────────────────────────
