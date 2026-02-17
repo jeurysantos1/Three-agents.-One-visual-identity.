@@ -131,17 +131,28 @@ Respond in your Brand Designer voice — technical, precise, with specific value
 const SYNTHESIS_SYSTEM = `You are the Lead Creative Producer synthesizing all Phase 2 kickoff work into one unified actionable brief. Be comprehensive but decisive. This document will be handed to the team to build the deck.`;
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage, onChunk) {
+  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
 
-const apiKey = (typeof import.meta !== "undefined" && import.meta.env?.VITE_ANTHROPIC_API_KEY) || "";
-
-const response = await fetch("https://api.anthropic.com/v1/messages", {
-  method: "POST",
-  headers: {
+  const headers = {
     "Content-Type": "application/json",
-    ...(apiKey ? { "x-api-key": apiKey } : {}),
     "anthropic-version": "2023-06-01",
     "anthropic-dangerous-direct-browser-access": "true",
-  },
+  };
+  if (apiKey) {
+    headers["x-api-key"] = apiKey;
+  }
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    }),
+  });
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
