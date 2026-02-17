@@ -1,165 +1,154 @@
-/**
- * ─────────────────────────────────────────────────────────────────────────────
- * THOUGHTTRACE
- * Live step-by-step reasoning trail for AI agents.
- *
- * Shows what each agent is doing before it delivers its final output.
- * Each step animates in real-time. Completed steps are clickable to
- * expand the full reasoning detail behind them.
- *
- * Usage:
- *   import { ThoughtTrace, useThoughtTrace } from "./ThoughtTrace";
- *
- *   const trace = useThoughtTrace(steps);
- *   trace.start();       // begin animating steps
- *   trace.complete();    // mark all done
- *   trace.reset();       // clear back to initial state
- *
- *   <ThoughtTrace
- *     steps={steps}         // array of { label, detail } objects
- *     completed={trace.completed}
- *     active={trace.active}
- *     accentColor="#B8FF47"
- *     accentTextColor="#0A0A0A"
- *   />
- * ─────────────────────────────────────────────────────────────────────────────
- */
-import "./ThoughtTrace.css";
+import { useEffect, useMemo, useState } from "react";
 
 /**
- * ThoughtTrace
- * - Maps your thinkSteps shape:
- *    think = { completed: number, active: string | null }
- * - Renders a clean Material row list with icon + motion states
- *
- * Usage example:
- * <ThoughtTrace
- *   title="Agent Reasoning"
- *   steps={ART_DIRECTOR_STEPS}
- *   think={thinkSteps.artDirector}
- *   live={phase !== "idle"}
- * />
+ * ThoughtTrace (Material + Hybrid motion)
+ * steps: [{ label, detail }]
+ * completedSteps: number
+ * activeStep: number | null
+ * accent: hex
+ * textColor: hex
  */
 export default function ThoughtTrace({
-  title = "Agent Reasoning",
   steps = [],
-  think = { completed: 0, active: null },
+  completedSteps = 0,
+  activeStep = null,
+  accent = "#6750A4",
+  textColor = "#1c1b1f",
   live = false,
   showHeader = true,
+  title = "ThoughtTrace",
 }) {
-  const completedCount = Number(think?.completed || 0);
-  const activeLabel = think?.active || null;
+  const [expanded, setExpanded] = useState(null);
 
-  // Determine active index:
-  // - If think.active is a label, match it
-  // - else "next step" = completedCount
-  const activeIndex =
-    activeLabel && steps?.length
-      ? Math.max(0, steps.findIndex((s) => s === activeLabel))
-      : Math.min(completedCount, Math.max(0, steps.length - 1));
+  // Ensure indices are sane
+  const activeIdx = typeof activeStep === "number" ? activeStep : null;
+  const doneCount = Math.max(0, Number(completedSteps || 0));
 
-  function stepStatus(label, idx) {
-    const done = idx < completedCount;
-    const active = !done && idx === activeIndex && live;
-    return { done, active };
-  }
+  const rows = useMemo(() => {
+    return steps.map((s, i) => {
+      const label = typeof s === "string" ? s : s?.label || "";
+      const detail = typeof s === "string" ? "" : s?.detail || "";
 
-  function classifyMotion(label, done, active) {
-    if (done) return "done";
-    if (!active) return "idle";
+      const isDone = i < doneCount;
+      const isActive = !isDone && live && activeIdx === i;
+      const isLocked = !isDone && !isActive;
 
-    const t = String(label || "").toLowerCase();
-    if (t.includes("lock")) return "locking";
-    if (t.includes("cross") || t.includes("review") || t.includes("reference"))
-      return "processing";
-    if (t.includes("synth") || t.includes("brief") || t.includes("structure"))
-      return "synthesizing";
+      const t = label.toLowerCase();
 
-    return "thinking";
-  }
+      // Hybrid motion state based on semantics
+      let mode = "idle";
+      if (isDone) mode = "done";
+      else if (isActive) {
+        if (t.includes("lock")) mode = "locking";
+        else if (t.includes("cross") || t.includes("review") || t.includes("reference")) mode = "processing";
+        else if (t.includes("synth") || t.includes("consolidat") || t.includes("finalis") || t.includes("finaliz") || t.includes("assembling")) mode = "synthesizing";
+        else mode = "thinking";
+      } else mode = "idle";
 
-  function iconFor(motion, done) {
-    if (done) return "check_circle";
-    if (motion === "locking") return "lock";
-    if (motion === "processing") return "sync";
-    if (motion === "synthesizing") return "hub";
-    if (motion === "thinking") return "psychology";
-    return "radio_button_unchecked";
-  }
+      const icon =
+        isDone ? "check_circle" :
+        mode === "locking" ? "lock" :
+        mode === "processing" ? "sync" :
+        mode === "synthesizing" ? "hub" :
+        mode === "thinking" ? "psychology" :
+        "radio_button_unchecked";
+
+      return { i, label, detail, isDone, isActive, isLocked, mode, icon };
+    });
+  }, [steps, doneCount, live, activeIdx]);
+
+  // Close expanded when list changes
+  useEffect(() => {
+    if (expanded == null) return;
+    if (expanded >= rows.length) setExpanded(null);
+  }, [rows.length, expanded]);
 
   return (
-    <div className="thoughttrace">
+    <div className="tt-root" style={{ ["--tt-accent"]: accent, ["--tt-on-accent"]: textColor }}>
       {showHeader ? (
-        <div className="thoughttrace-header">
-          <div className="thoughttrace-titleRow">
-            <div className="thoughttrace-title">{title}</div>
-            <div className="thoughttrace-sub">
-              {completedCount} steps completed
-            </div>
+        <div className="tt-header">
+          <div className="tt-header__left">
+            <div className="tt-header__title">{title}</div>
+            <div className="tt-header__meta">{doneCount} steps completed</div>
           </div>
-
           {live ? (
-            <div className="thoughttrace-livePill">
-              <span className="dot" />
+            <div className="tt-live">
+              <span className="tt-live__dot" aria-hidden="true" />
               LIVE
             </div>
           ) : null}
         </div>
       ) : null}
 
-      <div className="thoughttrace-list">
-        {steps.map((label, idx) => {
-          const { done, active } = stepStatus(label, idx);
-          const motion = classifyMotion(label, done, active);
-          const icon = iconFor(motion, done);
+      <div className="tt-list">
+        {rows.map((r) => {
+          const isOpen = expanded === r.i;
+          const canOpen = !r.isLocked && (r.isDone || r.isActive) && !!r.detail;
 
           return (
             <div
-              key={`${idx}-${label}`}
+              key={r.i}
               className={[
-                "thought-step",
-                motion,
-                active ? "active" : "",
-                done ? "done" : "",
+                "tt-step",
+                r.isActive ? "tt-step--active" : "",
+                r.isDone ? "tt-step--done" : "",
+                r.isLocked ? "tt-step--locked" : "",
+                r.mode ? `tt-mode--${r.mode}` : "",
               ].join(" ")}
             >
-              <div className="thought-timeline" aria-hidden="true">
-                <div className={`thought-dot ${done ? "done" : ""}`} />
-                <div className="thought-line" />
-              </div>
+              <button
+                type="button"
+                className="tt-row"
+                onClick={() => {
+                  if (!canOpen) return;
+                  setExpanded(isOpen ? null : r.i);
+                }}
+                aria-expanded={isOpen ? "true" : "false"}
+                style={{ cursor: canOpen ? "pointer" : "default" }}
+              >
+                <div className="tt-icon" aria-hidden="true">
+                  <span className={["ms", "tt-ms", r.isActive ? "tt-ms--active" : ""].join(" ")}>
+                    {r.icon}
+                  </span>
 
-              <span className="thought-icon ms" aria-hidden="true">
-                {icon}
-              </span>
-
-              <div className="thought-content">
-                <div className="thought-title">{label}</div>
-
-                {/* Inline annotation only when active */}
-                {active ? (
-                  <div className="thought-note">
-                    {motion === "synthesizing" ? (
-                      <span className="synth-dots" aria-label="Synthesizing">
-                        <span className="synth-dot" />
-                        <span className="synth-dot" />
-                        <span className="synth-dot" />
-                      </span>
-                    ) : null}
-
-                    <span className="thought-noteText">
-                      {motion === "locking"
-                        ? "Locking decisions into a stable baseline…"
-                        : motion === "processing"
-                        ? "Cross-checking constraints and aligning outputs…"
-                        : motion === "synthesizing"
-                        ? "Synthesizing into clear artifacts and next steps…"
-                        : "Thinking through the best direction…"}
+                  {/* inline synth dots when synthesizing */}
+                  {r.isActive && r.mode === "synthesizing" ? (
+                    <span className="tt-synthDots" aria-hidden="true">
+                      <span className="tt-synthDot" />
+                      <span className="tt-synthDot" />
+                      <span className="tt-synthDot" />
                     </span>
-                  </div>
-                ) : null}
-              </div>
+                  ) : null}
+                </div>
 
-              {active ? <div className="thought-live">LIVE</div> : null}
+                <div className="tt-body">
+                  <div className="tt-label">{r.label}</div>
+
+                  {/* Inline annotation only when active */}
+                  {r.isActive ? (
+                    <div className="tt-inline">
+                      {r.mode === "locking"
+                        ? "Locking decisions into an approved baseline…"
+                        : r.mode === "processing"
+                        ? "Cross-checking constraints and aligning outputs…"
+                        : r.mode === "synthesizing"
+                        ? "Synthesizing into artifacts + next steps…"
+                        : "Thinking through the best direction…"}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="tt-right">
+                  {r.isActive ? <span className="tt-pill tt-pill--live">LIVE</span> : null}
+                  {r.isDone ? <span className="tt-pill tt-pill--done">DONE</span> : null}
+                </div>
+              </button>
+
+              {isOpen ? (
+                <div className="tt-expand">
+                  <div className="tt-expand__text">{r.detail}</div>
+                </div>
+              ) : null}
             </div>
           );
         })}
@@ -167,4 +156,3 @@ export default function ThoughtTrace({
     </div>
   );
 }
-
