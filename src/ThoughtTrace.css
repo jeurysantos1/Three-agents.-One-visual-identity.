@@ -1,0 +1,220 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   THOUGHTTRACE — Styles
+   Self-contained. Drop into any project alongside ThoughtTrace.jsx
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.tt-root {
+  width: 100%;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────────────────────── */
+
+.tt-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.tt-header-dot {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.tt-header-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #888888;
+}
+
+.tt-header-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.tt-badge-done {
+  color: #AAAAAA;
+}
+
+.tt-badge-live {
+  animation: tt-pulse 1.2s infinite;
+}
+
+@keyframes tt-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* ── STEP LIST ──────────────────────────────────────────────────────────────── */
+
+.tt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tt-step {
+  border-radius: 7px;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.tt-step--active {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* ── ROW BUTTON ─────────────────────────────────────────────────────────────── */
+
+.tt-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  text-align: left;
+  border-radius: 7px;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.tt-row:not(:disabled):hover {
+  background: rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+
+.tt-row:disabled {
+  cursor: default;
+}
+
+/* ── ICON ───────────────────────────────────────────────────────────────────── */
+
+.tt-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+.tt-check {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tt-num {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* ── SPINNER ────────────────────────────────────────────────────────────────── */
+
+.tt-spinner {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  animation: tt-spin 0.65s linear infinite;
+}
+
+@keyframes tt-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── LABEL ──────────────────────────────────────────────────────────────────── */
+
+.tt-label {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  transition: color 0.3s, font-weight 0.2s;
+}
+
+.tt-step--locked .tt-label {
+  opacity: 0.4;
+}
+
+.tt-step--locked .tt-icon {
+  opacity: 0.5;
+}
+
+/* ── ANIMATED DOTS ──────────────────────────────────────────────────────────── */
+
+.tt-ellipsis {
+  display: inline;
+  margin-left: 1px;
+}
+
+.tt-ellipsis span {
+  animation: tt-dot 1.2s infinite;
+  opacity: 0;
+}
+
+.tt-ellipsis span:nth-child(1) { animation-delay: 0.0s; }
+.tt-ellipsis span:nth-child(2) { animation-delay: 0.2s; }
+.tt-ellipsis span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes tt-dot {
+  0%, 100% { opacity: 0; }
+  50%       { opacity: 1; }
+}
+
+/* ── CHEVRON ────────────────────────────────────────────────────────────────── */
+
+.tt-chevron {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* ── EXPANDED DETAIL ────────────────────────────────────────────────────────── */
+
+.tt-detail {
+  display: flex;
+  gap: 10px;
+  padding: 8px 8px 10px 33px;
+  background: rgba(0, 0, 0, 0.025);
+  border-radius: 0 0 7px 7px;
+  animation: tt-expand 0.15s ease;
+}
+
+@keyframes tt-expand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tt-detail-accent {
+  width: 2px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+  opacity: 0.5;
+}
+
+.tt-detail-text {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #666666;
+  margin: 0;
+}
