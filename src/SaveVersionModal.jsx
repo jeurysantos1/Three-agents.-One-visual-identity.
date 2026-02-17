@@ -58,7 +58,7 @@ export default function SaveVersionModal({
               className="vv-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Lime identity v1"
+              placeholder="e.g., Phase 2 baseline v1"
               autoFocus
             />
           </label>
@@ -85,11 +85,12 @@ export default function SaveVersionModal({
         </div>
 
         <div className="vv-modal__footer">
-          <button className="vv-btn" onClick={onClose}>
+          <button className="vv-btn" onClick={onClose} type="button">
             Cancel
           </button>
           <button
             className="vv-btn vv-btn--primary"
+            type="button"
             onClick={() => onSave?.({ name, notes, approve })}
           >
             <span className="ms" aria-hidden="true">
