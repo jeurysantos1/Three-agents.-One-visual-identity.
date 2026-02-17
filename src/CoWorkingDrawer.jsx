@@ -63,17 +63,14 @@ export default function CoWorkingDrawer({
 
   const grouped = useMemo(() => {
     const out = { live: [], decisions: [], questions: [], actions: [] };
-
     for (const m of messages) {
       const cat = categorize(m);
       out[cat].push(m);
     }
-
     return out;
   }, [messages]);
 
   const items = grouped[tab] || [];
-
   if (!open) return null;
 
   return (
