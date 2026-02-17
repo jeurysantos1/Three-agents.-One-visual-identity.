@@ -24,203 +24,147 @@
  *   />
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-import { useState, useCallback, useRef, useMemo } from "react";
 import "./ThoughtTrace.css";
 
 /**
- * useThoughtTrace — manages the animation state for a ThoughtTrace component.
+ * ThoughtTrace
+ * - Maps your thinkSteps shape:
+ *    think = { completed: number, active: string | null }
+ * - Renders a clean Material row list with icon + motion states
+ *
+ * Usage example:
+ * <ThoughtTrace
+ *   title="Agent Reasoning"
+ *   steps={ART_DIRECTOR_STEPS}
+ *   think={thinkSteps.artDirector}
+ *   live={phase !== "idle"}
+ * />
  */
-export function useThoughtTrace(steps = [], msPerStep = 900, msVariance = 500) {
-  const [completed, setCompleted] = useState(0);
-  const [active, setActive] = useState(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-  const cancelRef = useRef(false);
-
-  const start = useCallback(async () => {
-    cancelRef.current = false;
-    setIsRunning(true);
-    setIsDone(false);
-    setCompleted(0);
-    setActive(null);
-
-    for (let i = 0; i < steps.length; i++) {
-      if (cancelRef.current) break;
-      setActive(i);
-      setCompleted(i);
-      const wait = msPerStep + Math.random() * msVariance;
-      await new Promise((r) => setTimeout(r, wait));
-    }
-
-    if (!cancelRef.current) {
-      setCompleted(steps.length);
-      setActive(null);
-      setIsRunning(false);
-      setIsDone(true);
-    }
-  }, [steps, msPerStep, msVariance]);
-
-  const complete = useCallback(() => {
-    cancelRef.current = true;
-    setCompleted(steps.length);
-    setActive(null);
-    setIsRunning(false);
-    setIsDone(true);
-  }, [steps.length]);
-
-  const reset = useCallback(() => {
-    cancelRef.current = true;
-    setCompleted(0);
-    setActive(null);
-    setIsRunning(false);
-    setIsDone(false);
-  }, []);
-
-  return { completed, active, isRunning, isDone, start, complete, reset };
-}
-
-/**
- * ThoughtTrace — renders the animated step list.
- */
-export function ThoughtTrace({
+export default function ThoughtTrace({
+  title = "Agent Reasoning",
   steps = [],
-  completed = 0,
-  active = null,
-  accentColor = "#6750A4",
-  accentTextColor = "#0A0A0A", // kept for API compatibility (not heavily used now)
-  label = "Agent Reasoning",
+  think = { completed: 0, active: null },
+  live = false,
   showHeader = true,
 }) {
-  const [expanded, setExpanded] = useState(null);
+  const completedCount = Number(think?.completed || 0);
+  const activeLabel = think?.active || null;
 
-  const isRunning = active !== null;
-  const isDone = completed === steps.length && !isRunning;
+  // Determine active index:
+  // - If think.active is a label, match it
+  // - else "next step" = completedCount
+  const activeIndex =
+    activeLabel && steps?.length
+      ? Math.max(0, steps.findIndex((s) => s === activeLabel))
+      : Math.min(completedCount, Math.max(0, steps.length - 1));
 
-  const rootStyle = useMemo(
-    () => ({
-      // Material You accent token
-      ["--tt-accent"]: accentColor,
-      // if you want to use this later in CSS
-      ["--tt-accent-on"]: accentTextColor,
-    }),
-    [accentColor, accentTextColor]
-  );
+  function stepStatus(label, idx) {
+    const done = idx < completedCount;
+    const active = !done && idx === activeIndex && live;
+    return { done, active };
+  }
 
-  const toggle = (i) => {
-    const step = steps[i];
-    const isAccessible = i < completed || i === active;
-    if (!isAccessible || !step?.detail) return;
-    setExpanded((prev) => (prev === i ? null : i));
-  };
+  function classifyMotion(label, done, active) {
+    if (done) return "done";
+    if (!active) return "idle";
 
-  const iconFor = ({ isStepDone, isStepActive, isStepLocked }) => {
-    if (isStepActive) return "progress_activity";
-    if (isStepDone) return "check_circle";
-    if (isStepLocked) return "lock";
+    const t = String(label || "").toLowerCase();
+    if (t.includes("lock")) return "locking";
+    if (t.includes("cross") || t.includes("review") || t.includes("reference"))
+      return "processing";
+    if (t.includes("synth") || t.includes("brief") || t.includes("structure"))
+      return "synthesizing";
+
+    return "thinking";
+  }
+
+  function iconFor(motion, done) {
+    if (done) return "check_circle";
+    if (motion === "locking") return "lock";
+    if (motion === "processing") return "sync";
+    if (motion === "synthesizing") return "hub";
+    if (motion === "thinking") return "psychology";
     return "radio_button_unchecked";
-  };
+  }
 
   return (
-    <div className="tt-root" style={rootStyle}>
-      {showHeader && (
-        <div className="tt-header">
-          <span className="tt-header-dot" aria-hidden="true" />
-          <span className="tt-header-label">{label}</span>
+    <div className="thoughttrace">
+      {showHeader ? (
+        <div className="thoughttrace-header">
+          <div className="thoughttrace-titleRow">
+            <div className="thoughttrace-title">{title}</div>
+            <div className="thoughttrace-sub">
+              {completedCount} steps completed
+            </div>
+          </div>
 
-          {isDone && (
-            <span className="tt-header-badge tt-badge-done">
-              {steps.length} steps
-            </span>
-          )}
-
-          {isRunning && (
-            <span className="tt-header-badge tt-badge-live">LIVE</span>
-          )}
+          {live ? (
+            <div className="thoughttrace-livePill">
+              <span className="dot" />
+              LIVE
+            </div>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      <ol className="tt-list">
-        {steps.map((step, i) => {
-          const isStepDone = i < completed;
-          const isStepActive = i === active;
-          const isStepLocked = !isStepDone && !isStepActive;
-          const isOpen = expanded === i;
-          const hasDetail = Boolean(step.detail);
-          const isExpandable = (isStepDone || isStepActive) && hasDetail;
+      <div className="thoughttrace-list">
+        {steps.map((label, idx) => {
+          const { done, active } = stepStatus(label, idx);
+          const motion = classifyMotion(label, done, active);
+          const icon = iconFor(motion, done);
 
           return (
-            <li
-              key={i}
+            <div
+              key={`${idx}-${label}`}
               className={[
-                "tt-step",
-                isStepDone ? "tt-step--done" : "",
-                isStepActive ? "tt-step--active" : "",
-                isStepLocked ? "tt-step--locked" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+                "thought-step",
+                motion,
+                active ? "active" : "",
+                done ? "done" : "",
+              ].join(" ")}
             >
-              <button
-                className="tt-row"
-                onClick={() => toggle(i)}
-                disabled={isStepLocked || !hasDetail}
-                aria-expanded={isOpen}
-                aria-controls={`tt-detail-${i}`}
-              >
-                {/* Leading icon (Material Symbols Rounded) */}
-                <div className="tt-icon" aria-hidden="true">
-                  {isStepActive ? (
-                    // Keep spinner for “activity” feel; icon swaps still possible
-                    <span className="tt-spinner" />
-                  ) : (
-                    <span className="tt-ms">{iconFor({ isStepDone, isStepActive, isStepLocked })}</span>
-                  )}
-                </div>
+              <div className="thought-timeline" aria-hidden="true">
+                <div className={`thought-dot ${done ? "done" : ""}`} />
+                <div className="thought-line" />
+              </div>
 
-                {/* Label */}
-                <span className="tt-label">
-                  {step.label}
-                  {isStepActive && (
-                    <span className="tt-ellipsis" aria-hidden="true">
-                      <span>.</span>
-                      <span>.</span>
-                      <span>.</span>
+              <span className="thought-icon ms" aria-hidden="true">
+                {icon}
+              </span>
+
+              <div className="thought-content">
+                <div className="thought-title">{label}</div>
+
+                {/* Inline annotation only when active */}
+                {active ? (
+                  <div className="thought-note">
+                    {motion === "synthesizing" ? (
+                      <span className="synth-dots" aria-label="Synthesizing">
+                        <span className="synth-dot" />
+                        <span className="synth-dot" />
+                        <span className="synth-dot" />
+                      </span>
+                    ) : null}
+
+                    <span className="thought-noteText">
+                      {motion === "locking"
+                        ? "Locking decisions into a stable baseline…"
+                        : motion === "processing"
+                        ? "Cross-checking constraints and aligning outputs…"
+                        : motion === "synthesizing"
+                        ? "Synthesizing into clear artifacts and next steps…"
+                        : "Thinking through the best direction…"}
                     </span>
-                  )}
-                </span>
+                  </div>
+                ) : null}
+              </div>
 
-                {/* Trailing chevron (only if expandable) */}
-                {isExpandable && (
-                  <span
-                    className="tt-chevron tt-ms"
-                    style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
-                    aria-hidden="true"
-                  >
-                    chevron_right
-                  </span>
-                )}
-              </button>
-
-              {/* Expanded detail */}
-              {isOpen && hasDetail && (
-                <div
-                  id={`tt-detail-${i}`}
-                  className="tt-detail"
-                  role="region"
-                  aria-label={`Detail: ${step.label}`}
-                >
-                  <div className="tt-detail-accent" aria-hidden="true" />
-                  <p className="tt-detail-text">{step.detail}</p>
-                </div>
-              )}
-            </li>
+              {active ? <div className="thought-live">LIVE</div> : null}
+            </div>
           );
         })}
-      </ol>
+      </div>
     </div>
   );
 }
-
-export default ThoughtTrace;
 
