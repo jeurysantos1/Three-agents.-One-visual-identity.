@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { ThoughtTrace, useThoughtTrace } from "./ThoughtTrace";
+import ThoughtTrace from "./ThoughtTrace";
+import "./ThoughtTrace.css";
 import "./FlowPhase2Agents.css";
 import CoWorkingFab from "./CoWorkingFab";
 import CoWorkingDrawer from "./CoWorkingDrawer";
@@ -548,12 +549,14 @@ function openCoWorking() {
                     {isDone && <span className="think-header-count">{AGENT_STEPS[agent.id].length} steps completed</span>}
                     {isRunning && <span className="think-header-live" style={{ color: agent.color }}>● LIVE</span>}
                   </div>
-                  <ThinkingFeed
-                    agentId={agent.id}
+                  <ThoughtTrace
+                    steps={AGENT_STEPS[agent.id]}
                     completedSteps={steps.completed}
                     activeStep={steps.active}
-                    color={agent.color}
+                    accent={agent.color}
                     textColor={agent.textColor}
+                    live={isRunning}
+                    showHeader={false}
                   />
                 </div>
               )}
@@ -643,12 +646,14 @@ function openCoWorking() {
               {statuses.synthesizer === "running" && <span className="think-header-live" style={{ color: "#B8FF47" }}>● LIVE</span>}
               {statuses.synthesizer === "done" && <span className="think-header-count">{AGENT_STEPS.synthesizer.length} steps completed</span>}
             </div>
-            <ThinkingFeed
-              agentId="synthesizer"
+            <ThoughtTrace
+              steps={AGENT_STEPS.synthesizer}
               completedSteps={thinkSteps.synthesizer.completed}
               activeStep={thinkSteps.synthesizer.active}
-              color="#B8FF47"
+              accent="#B8FF47"
               textColor="#0A0A0A"
+              live={statuses.synthesizer === "running"}
+              showHeader={false}
             />
           </div>
         )}
