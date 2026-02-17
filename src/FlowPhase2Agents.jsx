@@ -154,22 +154,6 @@ async function callClaude(systemPrompt, userMessage, onChunk) {
     }),
   });
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userMessage }],
-    }),
-  });
-
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     throw new Error(err.error?.message || `API error ${response.status}`);
@@ -389,7 +373,7 @@ export default function FlowPhase2Agents() {
       {/* ── ERROR BANNER ── */}
       {error && (
         <div className="error-banner">
-          <strong>⚠ Error:</strong> {error} — Check your API key in <code>.env.local</code>
+          <strong>⚠ Error:</strong> {error} — Check your Anthropic API key is valid at <code>console.anthropic.com</code>
         </div>
       )}
 
