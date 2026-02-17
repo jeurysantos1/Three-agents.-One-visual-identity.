@@ -1,0 +1,304 @@
+/* Uses .ms from your CoWorking.css (Material Symbols Rounded) */
+
+.vv-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  display:flex;
+  justify-content:flex-end;
+}
+
+.vv-drawer{
+  width: min(520px, 100vw);
+  height: 100%;
+  background: rgba(255,255,255,0.96);
+  border-left: 1px solid rgba(0,0,0,0.10);
+  box-shadow: -18px 0 60px rgba(0,0,0,0.30);
+  display:flex;
+  flex-direction:column;
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-drawer{
+    background: rgba(18,18,18,0.96);
+    border-left-color: rgba(255,255,255,0.12);
+  }
+}
+
+@media (max-width: 780px){
+  .vv-overlay{ justify-content:center; align-items:flex-end; }
+  .vv-drawer{
+    width: 100%;
+    height: min(78vh, 780px);
+    border-left: none;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+  }
+}
+
+.vv-modal{
+  width: min(560px, calc(100vw - 24px));
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.30);
+  margin: auto;
+  display:flex;
+  flex-direction:column;
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-modal{
+    background: rgba(18,18,18,0.96);
+    border-color: rgba(255,255,255,0.12);
+  }
+}
+
+.vv-header, .vv-modal__header{
+  padding: 14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-header, .vv-modal__header{
+    border-bottom-color: rgba(255,255,255,0.10);
+  }
+}
+
+.vv-header__titleRow, .vv-modal__titleRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.vv-header__title, .vv-modal__title{
+  margin:0;
+  font-size: 16px;
+  font-weight: 720;
+}
+
+.vv-iconBtn{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: transparent;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-iconBtn{ border-color: rgba(255,255,255,0.12); }
+}
+
+.vv-toolbar{
+  padding: 10px 12px;
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-toolbar{ border-bottom-color: rgba(255,255,255,0.08); }
+}
+
+.vv-seg{
+  display:flex;
+  gap:6px;
+  background: rgba(0,0,0,0.04);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-seg{
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.12);
+  }
+}
+
+.vv-seg__btn{
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor:pointer;
+  opacity: 0.75;
+}
+.vv-seg__btn--active{
+  background: rgba(0,0,0,0.08);
+  opacity: 1;
+}
+@media (prefers-color-scheme: dark){
+  .vv-seg__btn--active{ background: rgba(255,255,255,0.10); }
+}
+
+.vv-body, .vv-modal__body{
+  padding: 12px;
+  overflow:auto;
+  flex: 1;
+}
+
+.vv-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.vv-item{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
+}
+@media (prefers-color-scheme: dark){
+  .vv-item{
+    border-color: rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.05);
+  }
+}
+.vv-item--approved{
+  border-color: rgba(0,201,123,0.35);
+}
+
+.vv-item__nameRow{
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.vv-item__name{
+  font-weight: 740;
+  font-size: 13px;
+}
+.vv-item__meta{
+  font-size: 11px;
+  opacity: 0.72;
+  margin-top: 4px;
+}
+.vv-item__notes{
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.85;
+  margin-top: 8px;
+}
+
+.vv-pill{
+  font-size: 11px;
+  font-weight: 750;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0,201,123,0.14);
+}
+.vv-pill--muted{
+  background: rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark){
+  .vv-pill--muted{ background: rgba(255,255,255,0.12); }
+}
+
+.vv-item__actions{
+  display:flex;
+  gap: 8px;
+  align-items:flex-start;
+}
+
+.vv-footer, .vv-modal__footer{
+  padding: 10px 12px 14px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+@media (prefers-color-scheme: dark){
+  .vv-footer, .vv-modal__footer{ border-top-color: rgba(255,255,255,0.08); }
+}
+
+.vv-footer__hint{
+  display:flex;
+  gap: 8px;
+  align-items:flex-start;
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
+.vv-field{ display:flex; flex-direction:column; gap: 6px; margin-bottom: 12px; }
+.vv-label{ font-size: 12px; font-weight: 700; opacity: 0.85; }
+.vv-input, .vv-textarea{
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.02);
+  font: inherit;
+}
+@media (prefers-color-scheme: dark){
+  .vv-input, .vv-textarea{
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.92);
+  }
+}
+.vv-check{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.vv-btn{
+  border: 1px solid rgba(0,0,0,0.12);
+  background: transparent;
+  border-radius: 999px;
+  padding: 10px 12px;
+  cursor:pointer;
+  font-size: 12px;
+  display:inline-flex;
+  gap: 8px;
+  align-items:center;
+}
+@media (prefers-color-scheme: dark){
+  .vv-btn{ border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.92); }
+}
+.vv-btn--primary{
+  background: rgba(0,0,0,0.92);
+  color: white;
+  border-color: transparent;
+}
+@media (prefers-color-scheme: dark){
+  .vv-btn--primary{ background: rgba(255,255,255,0.90); color: #0A0A0A; }
+}
+.vv-btn--ghost{
+  background: rgba(0,0,0,0.03);
+}
+@media (prefers-color-scheme: dark){
+  .vv-btn--ghost{ background: rgba(255,255,255,0.06); }
+}
+
+.vv-empty{
+  height: 100%;
+  min-height: 200px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding: 24px;
+  opacity: 0.85;
+}
+.vv-empty__icon{ font-size: 28px; margin-bottom: 10px; opacity: 0.8; }
+.vv-empty__title{ font-size: 13px; font-weight: 700; }
+.vv-empty__sub{ font-size: 12px; margin-top: 6px; opacity: 0.75; }
