@@ -34,7 +34,9 @@ function computeSnapshotHash(snapshot) {
     {
       inputs: snapshot.inputs,
       outputs: snapshot.outputs,
-      synthesis: snapshot.synthesis,
+      statuses: snapshot.statuses,
+      phase: snapshot.phase,
+      activeAgent: snapshot.activeAgent,
     },
     null,
     0
@@ -54,20 +56,17 @@ function saveAll(list) {
 }
 
 /**
- * Snapshot shape (recommended):
+ * Version record (stored in localStorage)
  * {
- *  id, name, status, createdAt, notes,
- *  inputs: { userPrompt, constraints, agentConfig },
- *  outputs: { artDirector, brandStrategist, brandDesigner, synthesizer, systemOutput },
- *  messages: [...],
- *  synthesis: { decisions: [], rationale: "", nextSteps: [] },
+ *  id, name, status: "draft"|"approved", notes, createdAt,
+ *  inputs, outputs, statuses, phase, activeAgent, messages, thinkSteps, expandedOutput,
  *  hash
  * }
  */
 export function useVersions() {
   const [versions, setVersions] = useState(() => loadAll());
 
-  // Keep in sync if user has multiple tabs open
+  // Keep in sync across tabs
   useEffect(() => {
     function onStorage(e) {
       if (e.key === STORAGE_KEY) setVersions(loadAll());
@@ -97,10 +96,16 @@ export function useVersions() {
         status: "draft",
         notes,
         createdAt,
+
         inputs: snapshot.inputs || {},
         outputs: snapshot.outputs || {},
+        statuses: snapshot.statuses || {},
+        phase: snapshot.phase || "idle",
+        activeAgent: typeof snapshot.activeAgent !== "undefined" ? snapshot.activeAgent : null,
+
         messages: snapshot.messages || [],
-        synthesis: snapshot.synthesis || {},
+        thinkSteps: snapshot.thinkSteps || {},
+        expandedOutput: snapshot.expandedOutput || {},
       };
 
       v.hash = computeSnapshotHash(v);
