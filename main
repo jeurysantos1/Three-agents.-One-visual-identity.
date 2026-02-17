@@ -1,0 +1,1069 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── BRAND CONTEXT ────────────────────────────────────────────────────────────
+const BRAND_CONTEXT = `
+FLOW — AI Program Manager | Phase 2: Visual Identity System
+
+FROM PHASE 1 FOUNDATION:
+- Brand Essence: "Flow is the invisible conductor that transforms chaos into choreography — where execution becomes elegant, automatic, and intentional."
+- Archetype: Magician + Sage
+- Core Metaphor: The Maestro (conductor), Adaptive Water
+- Values: Invisibility as Excellence, Momentum Compounds, Calm Intelligence, Reality Over Prescription, Orchestration Not Ownership
+- Voice: Clear+Direct, Intelligent+Confident, Calm+Reassuring, Human+Warm, Forward-Looking
+- Tagline candidates: "Flow replaces chaos with clarity" / "Stop coordinating. Start building."
+- ICP: Startup PMs at Series A–C SaaS companies (30–300 employees), drowning in coordination tax
+
+VISUAL REFERENCE INSPIRATION (from uploaded image):
+- Clean white/cream background (#F5F5F0 or similar warm off-white)
+- Bold black display typography (heavy, editorial weight)
+- Neon/electric lime-green accent (#B8FF47 or similar) as a single bold pop of color
+- Cards with rounded corners, light backgrounds, soft shadows
+- Photo-forward card design — real people, editorial photography style
+- Tags/chips as small pill labels
+- Clean, minimal nav
+- Generous white space
+- The "Elevate Your Game" kicker style (tiny caps label above headline)
+
+PHASE 2 DELIVERABLE: Visual Identity System
+The deck must cover:
+1. Color System (primary palette, tokens, usage rules)
+2. Typography System (display, body, mono scales)
+3. Shape Language & Grid
+4. Iconography & Illustration Style
+5. Motion Principles
+6. Brand-in-use mockups
+
+COLOR DIRECTION TO EXPLORE:
+Background: Warm off-white/cream (#F5F3EE or #FAFAF7)
+Primary dark: Near-black (#0A0A0A or #111111)
+Brand accent 1: Electric lime-green (like #B8FF47 or #AAFF3E) — energetic, modern, unexpected for a B2B tool
+Brand accent 2: Possibly a deep blue-violet (#1A0E3C or #0A0E27) for depth and intelligence
+Neutrals: Cool grays for secondary text
+`;
+
+// ─── AGENT DEFINITIONS ────────────────────────────────────────────────────────
+const AGENTS = {
+  artDirector: {
+    id: "artDirector",
+    name: "Art Director",
+    title: "Creative Direction & Brand Vision",
+    avatar: "AD",
+    color: "#B8FF47",
+    textColor: "#0A0A0A",
+    bgCard: "#F5F3EE",
+    role: `You are the Art Director for FLOW's Phase 2 Visual Identity System. You are bold, opinionated, and think in systems, metaphors, and emotional resonance. You've built category-defining brands for B2B SaaS companies like Linear, Notion, and Stripe.
+
+Your job in this Phase 2 kickoff is to:
+1. Define the creative direction — tone, mood, visual language, and the "feeling" of every touchpoint
+2. Set guardrails for what the brand IS and IS NOT visually
+3. Guide the Brand Strategist on what the deck narrative structure should communicate
+4. Brief the Brand Designer on the specific artifacts to create
+
+Be decisive. Be specific. Reference real design references (Awwwards sites, specific brands, designers). Think about the reference image the client shared: white background, bold black type, neon lime green accent, editorial photography cards. That energy needs to translate into a B2B SaaS brand that feels intelligent and fast.
+
+Context:
+${BRAND_CONTEXT}
+
+Respond in your Art Director voice — confident, crisp, specific. Use markdown headers. Max 400 words. Address both the Brand Strategist and Brand Designer directly.`,
+  },
+
+  brandStrategist: {
+    id: "brandStrategist",
+    name: "Brand Strategist",
+    title: "Positioning & Deck Narrative",
+    avatar: "BS",
+    color: "#0A0E27",
+    textColor: "#FFFFFF",
+    bgCard: "#0A0E27",
+    role: `You are the Brand Strategist for FLOW's Phase 2 Visual Identity System. You translate business strategy into brand architecture and narrative. You've led brand strategy for B2B SaaS companies from seed to Series C.
+
+Your job in this Phase 2 kickoff is to:
+1. Define the narrative arc for the Phase 2 Visual Identity deck — what story does it tell?
+2. Document the strategic rationale behind every visual decision (why this color palette, why this typography)
+3. Write the positioning language that will anchor each section of the deck
+4. Ensure every design decision ties back to Phase 1 brand foundation
+
+Respond after reading the Art Director's creative direction. Build on it, add strategic depth. Define:
+- The deck's 10-12 slide narrative structure
+- The strategic brief for each major section
+- Key messages per section
+- What the deck must prove to stakeholders
+
+Context:
+${BRAND_CONTEXT}
+
+Respond in your Brand Strategist voice — structured, strategic, with clear reasoning. Use markdown headers. Max 400 words. Respond to the Art Director's direction and brief the Brand Designer on what artifacts carry the most strategic weight.`,
+  },
+
+  brandDesigner: {
+    id: "brandDesigner",
+    name: "Brand Designer",
+    title: "Artifacts & Visual Execution",
+    avatar: "BD",
+    color: "#FF6B35",
+    textColor: "#FFFFFF",
+    bgCard: "#1C1C1C",
+    role: `You are the Brand Designer for FLOW's Phase 2 Visual Identity System. You are meticulous, detail-obsessed, and think in systems. You've built design systems for companies like Vercel, Railway, and Linear.
+
+Your job in this Phase 2 kickoff is to:
+1. Define the exact color tokens, hex values, and usage rules for the deck
+2. Specify the typography stack — exact fonts, weights, sizes, line heights
+3. Define the shape language system — border radius tokens, spacing, grid
+4. Plan the visual artifacts that need to be created for the deck
+5. Propose the slide template system (master slide designs)
+
+Respond after reading both the Art Director and Brand Strategist. Be hyper-specific:
+- Exact hex codes for every color
+- Exact font names and weights
+- Exact spacing/grid values
+- List every artifact you'll create (color palette showcase, type specimen, icon preview, etc.)
+
+Context:
+${BRAND_CONTEXT}
+
+Visual reference: The client shared a site with warm cream background (#F5F3EE approx), near-black type (#0A0A0A), electric lime green accent, rounded cards with editorial photography. Take this energy — editorial, bold, modern — and translate it into Flow's B2B intelligence brand.
+
+Respond in your Brand Designer voice — technical, precise, with specific values. Use markdown headers. Max 500 words.`,
+  },
+
+  synthesizer: {
+    id: "synthesizer",
+    name: "Phase 2 Synthesis",
+    title: "Unified Brief & Deck Blueprint",
+    avatar: "⚡",
+    color: "#B8FF47",
+    textColor: "#0A0A0A",
+    bgCard: "#F5F3EE",
+    role: `You are the Lead Creative Producer synthesizing the Art Director, Brand Strategist, and Brand Designer's Phase 2 kickoff into a single actionable brief.
+
+Create the FINAL PHASE 2 MASTER BRIEF that includes:
+
+## FLOW — PHASE 2 VISUAL IDENTITY BRIEF
+
+### Creative Direction (from Art Director)
+### Strategic Narrative (from Brand Strategist)  
+### Design Specifications (from Brand Designer)
+### Deck Blueprint: Slide-by-Slide Plan (12-15 slides)
+For each slide: Title | Purpose | Key Visual | Content Elements | Design Notes
+
+### Color System (final)
+### Typography System (final)
+### Master Slide Template Specs
+### Artifact Production Checklist
+### What This Deck Must Achieve
+
+Be comprehensive but decisive. This document will be handed directly to the team to build the deck in the next session.`,
+  },
+};
+
+// ─── ANTHROPIC CALL ───────────────────────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage, onChunk) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    }),
+  });
+  const data = await response.json();
+  const text = data.content?.[0]?.text || "No response received.";
+  // Word-by-word streaming simulation
+  const words = text.split(" ");
+  let accumulated = "";
+  for (let i = 0; i < words.length; i++) {
+    accumulated += (i > 0 ? " " : "") + words[i];
+    onChunk(accumulated);
+    await new Promise((r) => setTimeout(r, 22));
+  }
+  return text;
+}
+
+// ─── MARKDOWN RENDERER ────────────────────────────────────────────────────────
+function renderMd(text, accentColor = "#B8FF47") {
+  if (!text) return "";
+  return text
+    .replace(/^# (.+)$/gm, `<h1 style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.15rem;font-weight:900;color:${accentColor};margin:1.2rem 0 0.4rem;letter-spacing:-0.02em">$1</h1>`)
+    .replace(/^## (.+)$/gm, `<h2 style="font-family:'Cabinet Grotesk',sans-serif;font-size:0.85rem;font-weight:800;color:#0A0A0A;margin:1rem 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase">$1</h2>`)
+    .replace(/^### (.+)$/gm, `<h3 style="font-size:0.82rem;font-weight:700;color:#333;margin:0.8rem 0 0.25rem">$1</h3>`)
+    .replace(/\*\*(.+?)\*\*/g, `<strong style="color:#0A0A0A;font-weight:700">$1</strong>`)
+    .replace(/\*(.+?)\*/g, `<em style="color:${accentColor};font-style:normal;font-weight:600">$1</em>`)
+    .replace(/^- (.+)$/gm, `<div style="display:flex;gap:8px;margin:3px 0;padding-left:4px"><span style="color:${accentColor};font-weight:900;margin-top:1px">›</span><span>$1</span></div>`)
+    .replace(/^\d+\. (.+)$/gm, `<div style="display:flex;gap:8px;margin:4px 0"><span style="color:${accentColor};font-weight:700;min-width:16px">•</span><span>$1</span></div>`)
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+export default function FlowPhase2Agents() {
+  const [phase, setPhase] = useState("idle"); // idle | running | synthesis | done
+  const [activeAgent, setActiveAgent] = useState(null);
+  const [outputs, setOutputs] = useState({ artDirector: "", brandStrategist: "", brandDesigner: "", synthesizer: "" });
+  const [statuses, setStatuses] = useState({ artDirector: "waiting", brandStrategist: "waiting", brandDesigner: "waiting", synthesizer: "waiting" });
+  const [messages, setMessages] = useState([]); // cross-agent message log
+  const scrollRefs = useRef({});
+  const logRef = useRef(null);
+
+  const addMessage = (from, to, content, type = "brief") => {
+    setMessages((prev) => [...prev, { from, to, content, type, ts: Date.now() }]);
+    setTimeout(() => {
+      if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+    }, 50);
+  };
+
+  async function runPipeline() {
+    setPhase("running");
+    const collectedOutputs = {};
+
+    // ── 1. ART DIRECTOR ──────────────────────────────────────────────────────
+    setActiveAgent("artDirector");
+    setStatuses((s) => ({ ...s, artDirector: "running" }));
+    addMessage("SYSTEM", "artDirector", "Initiating Phase 2 kickoff. Art Director — define the creative direction.", "system");
+
+    const adOutput = await callClaude(
+      AGENTS.artDirector.role,
+      `You're kicking off the Phase 2 Visual Identity System for Flow. Based on the brand foundation from Phase 1 and the visual reference the client shared (cream background, bold black type, electric lime green accent, editorial card design), define the creative direction for the deck. Address the Brand Strategist and Brand Designer in your brief.`,
+      (chunk) => {
+        setOutputs((o) => ({ ...o, artDirector: chunk }));
+        if (scrollRefs.current.artDirector) scrollRefs.current.artDirector.scrollTop = scrollRefs.current.artDirector.scrollHeight;
+      }
+    );
+    collectedOutputs.artDirector = adOutput;
+    setOutputs((o) => ({ ...o, artDirector: adOutput }));
+    setStatuses((s) => ({ ...s, artDirector: "done" }));
+    addMessage("artDirector", "brandStrategist", "Creative direction set. Passing to Brand Strategist for narrative structure.", "handoff");
+    addMessage("artDirector", "brandDesigner", "Visual brief sent. Awaiting your artifact specs.", "handoff");
+    await new Promise((r) => setTimeout(r, 600));
+
+    // ── 2. BRAND STRATEGIST ──────────────────────────────────────────────────
+    setActiveAgent("brandStrategist");
+    setStatuses((s) => ({ ...s, brandStrategist: "running" }));
+    addMessage("brandStrategist", "ALL", "Acknowledged. Building deck narrative and strategic architecture.", "status");
+
+    const bsOutput = await callClaude(
+      AGENTS.brandStrategist.role,
+      `The Art Director has defined the creative direction:\n\n${adOutput}\n\nNow define the deck's strategic narrative structure for Phase 2. What story does this deck tell? What are the 12 slides and their strategic purpose? Brief the Brand Designer on which artifacts carry the most strategic weight.`,
+      (chunk) => {
+        setOutputs((o) => ({ ...o, brandStrategist: chunk }));
+        if (scrollRefs.current.brandStrategist) scrollRefs.current.brandStrategist.scrollTop = scrollRefs.current.brandStrategist.scrollHeight;
+      }
+    );
+    collectedOutputs.brandStrategist = bsOutput;
+    setOutputs((o) => ({ ...o, brandStrategist: bsOutput }));
+    setStatuses((s) => ({ ...s, brandStrategist: "done" }));
+    addMessage("brandStrategist", "brandDesigner", "Narrative structure locked. Your artifact brief is embedded — check the high-priority items.", "handoff");
+    await new Promise((r) => setTimeout(r, 600));
+
+    // ── 3. BRAND DESIGNER ────────────────────────────────────────────────────
+    setActiveAgent("brandDesigner");
+    setStatuses((s) => ({ ...s, brandDesigner: "running" }));
+    addMessage("brandDesigner", "ALL", "Reading both briefs. Defining exact tokens and artifact list now.", "status");
+
+    const bdOutput = await callClaude(
+      AGENTS.brandDesigner.role,
+      `The Art Director's creative direction:\n\n${adOutput}\n\nThe Brand Strategist's narrative structure:\n\n${bsOutput}\n\nNow define the exact design specifications: every color hex, every font name and weight, every spacing value. List every artifact you'll produce for the deck. Be hyper-specific — this is the technical brief the team will execute from.`,
+      (chunk) => {
+        setOutputs((o) => ({ ...o, brandDesigner: chunk }));
+        if (scrollRefs.current.brandDesigner) scrollRefs.current.brandDesigner.scrollTop = scrollRefs.current.brandDesigner.scrollHeight;
+      }
+    );
+    collectedOutputs.brandDesigner = bdOutput;
+    setOutputs((o) => ({ ...o, brandDesigner: bdOutput }));
+    setStatuses((s) => ({ ...s, brandDesigner: "done" }));
+    addMessage("brandDesigner", "ALL", "Specs locked. Artifact list confirmed. Ready for synthesis.", "handoff");
+    await new Promise((r) => setTimeout(r, 800));
+
+    // ── 4. SYNTHESIS ─────────────────────────────────────────────────────────
+    setPhase("synthesis");
+    setActiveAgent("synthesizer");
+    setStatuses((s) => ({ ...s, synthesizer: "running" }));
+    addMessage("SYSTEM", "ALL", "All agents complete. Synthesizing into unified Phase 2 Master Brief.", "system");
+
+    const synthOutput = await callClaude(
+      AGENTS.synthesizer.role,
+      `Synthesize all three agents into the final Phase 2 Master Brief:\n\n--- ART DIRECTOR ---\n${adOutput}\n\n--- BRAND STRATEGIST ---\n${bsOutput}\n\n--- BRAND DESIGNER ---\n${bdOutput}\n\nCreate the unified brief and slide-by-slide deck blueprint.`,
+      (chunk) => {
+        setOutputs((o) => ({ ...o, synthesizer: chunk }));
+        if (scrollRefs.current.synthesizer) scrollRefs.current.synthesizer.scrollTop = scrollRefs.current.synthesizer.scrollHeight;
+      }
+    );
+    collectedOutputs.synthesizer = synthOutput;
+    setOutputs((o) => ({ ...o, synthesizer: synthOutput }));
+    setStatuses((s) => ({ ...s, synthesizer: "done" }));
+    setActiveAgent(null);
+    setPhase("done");
+    addMessage("SYSTEM", "ALL", "Phase 2 Master Brief complete. Ready to build the deck.", "system");
+  }
+
+  const statusLabel = { waiting: "STANDBY", running: "ACTIVE", done: "COMPLETE" };
+
+  // Color palette preview swatches
+  const colorSwatches = [
+    { name: "Canvas", hex: "#F5F3EE", dark: false },
+    { name: "Ink", hex: "#0A0A0A", dark: true },
+    { name: "Lime", hex: "#B8FF47", dark: false },
+    { name: "Void", hex: "#0A0E27", dark: true },
+    { name: "Slate", hex: "#6B7280", dark: true },
+    { name: "Amber", hex: "#FFB020", dark: false },
+  ];
+
+  return (
+    <div style={{
+      background: "#F5F3EE",
+      minHeight: "100vh",
+      fontFamily: "'DM Mono', 'Fira Code', monospace",
+      color: "#0A0A0A",
+      overflowX: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+        .topbar {
+          background: #0A0A0A;
+          padding: 16px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: sticky;
+          top: 0;
+          z-index: 200;
+        }
+
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .logo-mark {
+          width: 34px;
+          height: 34px;
+          background: #B8FF47;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Syne', sans-serif;
+          font-weight: 900;
+          font-size: 14px;
+          color: #0A0A0A;
+          letter-spacing: -0.05em;
+        }
+
+        .logo-text {
+          font-family: 'Syne', sans-serif;
+          font-weight: 900;
+          font-size: 18px;
+          color: #fff;
+          letter-spacing: -0.03em;
+        }
+
+        .logo-phase {
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          color: #555;
+          text-transform: uppercase;
+          margin-top: 1px;
+        }
+
+        .phase-pill {
+          background: #B8FF47;
+          color: #0A0A0A;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          padding: 6px 14px;
+          border-radius: 100px;
+        }
+
+        .launch-btn {
+          background: #B8FF47;
+          color: #0A0A0A;
+          border: none;
+          padding: 12px 28px;
+          border-radius: 100px;
+          font-family: 'DM Mono', monospace;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+
+        .launch-btn:hover { background: #CAFF6A; transform: translateY(-1px); }
+        .launch-btn:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+
+        .hero {
+          padding: 60px 32px 40px;
+          max-width: 900px;
+        }
+
+        .hero-kicker {
+          font-size: 10px;
+          letter-spacing: 0.3em;
+          text-transform: uppercase;
+          color: #888;
+          margin-bottom: 16px;
+        }
+
+        .hero-title {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(32px, 5vw, 52px);
+          font-weight: 900;
+          color: #0A0A0A;
+          line-height: 1.05;
+          letter-spacing: -0.04em;
+          margin-bottom: 16px;
+        }
+
+        .hero-title .accent { color: #B8FF47; }
+
+        .hero-sub {
+          font-size: 13px;
+          color: #666;
+          line-height: 1.7;
+          max-width: 540px;
+        }
+
+        .pipeline-bar {
+          background: #0A0A0A;
+          padding: 14px 32px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          overflow-x: auto;
+          border-bottom: 2px solid #B8FF47;
+        }
+
+        .pip-step {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          white-space: nowrap;
+          padding: 4px 12px;
+          border-radius: 100px;
+          transition: all 0.3s;
+        }
+        .pip-step.active { background: #B8FF47; }
+        .pip-step.done { background: rgba(184,255,71,0.15); }
+
+        .pip-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #333;
+          transition: all 0.3s;
+          flex-shrink: 0;
+        }
+        .pip-dot.active { background: #0A0A0A; animation: blink 0.8s infinite; }
+        .pip-dot.done { background: #B8FF47; }
+
+        .pip-label {
+          font-size: 9px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: #444;
+          transition: color 0.3s;
+        }
+        .pip-step.active .pip-label { color: #0A0A0A; font-weight: 700; }
+        .pip-step.done .pip-label { color: #B8FF47; }
+
+        .pip-arrow { color: #333; font-size: 10px; }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .main-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 1px;
+          background: #E0DDD6;
+        }
+
+        .agent-card {
+          background: #F5F3EE;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+          min-height: 420px;
+        }
+
+        .agent-card-header {
+          padding: 20px 22px 16px;
+          border-bottom: 1px solid #E0DDD6;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .agent-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Syne', sans-serif;
+          font-weight: 900;
+          font-size: 12px;
+          letter-spacing: -0.02em;
+          flex-shrink: 0;
+          border: 1.5px solid #E0DDD6;
+        }
+
+        .agent-info { flex: 1; }
+
+        .agent-name {
+          font-family: 'Syne', sans-serif;
+          font-weight: 800;
+          font-size: 13px;
+          color: #0A0A0A;
+          letter-spacing: -0.02em;
+          margin-bottom: 2px;
+        }
+
+        .agent-title {
+          font-size: 9px;
+          color: #999;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .status-badge {
+          font-size: 8px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          padding: 4px 8px;
+          border-radius: 100px;
+          font-weight: 700;
+          flex-shrink: 0;
+          transition: all 0.3s;
+        }
+
+        .status-waiting { background: #E8E6E0; color: #888; }
+        .status-running { background: #0A0A0A; color: #B8FF47; animation: pulse-badge 1s infinite; }
+        .status-done { background: #B8FF47; color: #0A0A0A; }
+
+        @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+        .agent-progress {
+          height: 2px;
+          background: #E0DDD6;
+          overflow: hidden;
+        }
+        .agent-progress-bar {
+          height: 100%;
+          background: #B8FF47;
+          animation: scan 1.8s linear infinite;
+        }
+        @keyframes scan { 0%{width:0;margin-left:0} 60%{width:60%;margin-left:20%} 100%{width:0;margin-left:100%} }
+
+        .agent-output {
+          flex: 1;
+          overflow-y: auto;
+          padding: 18px 22px;
+          font-size: 11.5px;
+          line-height: 1.75;
+          color: #444;
+        }
+
+        .waiting-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 200px;
+          gap: 10px;
+          color: #CCC;
+        }
+
+        .waiting-state .w-circle {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 2px dashed #DDD;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+        }
+
+        .waiting-label {
+          font-size: 9px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #CCC;
+        }
+
+        /* Message Log */
+        .log-panel {
+          background: #0A0A0A;
+          padding: 0;
+          border-top: 2px solid #B8FF47;
+        }
+
+        .log-header {
+          padding: 16px 24px;
+          border-bottom: 1px solid #1a1a1a;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .log-title {
+          font-family: 'Syne', sans-serif;
+          font-weight: 800;
+          font-size: 13px;
+          color: #fff;
+          letter-spacing: -0.02em;
+        }
+
+        .log-sub {
+          font-size: 9px;
+          color: #444;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+
+        .log-feed {
+          overflow-y: auto;
+          max-height: 200px;
+          padding: 16px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .log-entry {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .log-from {
+          font-weight: 700;
+          font-size: 9px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          padding: 3px 8px;
+          border-radius: 100px;
+          flex-shrink: 0;
+          margin-top: 1px;
+        }
+
+        .log-arrow {
+          color: #333;
+          font-size: 10px;
+          margin-top: 4px;
+          flex-shrink: 0;
+        }
+
+        .log-to {
+          font-size: 9px;
+          color: #444;
+          margin-top: 4px;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .log-msg {
+          color: #888;
+          flex: 1;
+        }
+
+        /* Synthesis Panel */
+        .synth-panel {
+          background: #fff;
+          border-top: 1px solid #E0DDD6;
+        }
+
+        .synth-header {
+          background: #0A0A0A;
+          padding: 24px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .synth-icon {
+          width: 52px;
+          height: 52px;
+          background: #B8FF47;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 22px;
+          flex-shrink: 0;
+        }
+
+        .synth-title {
+          font-family: 'Syne', sans-serif;
+          font-weight: 900;
+          font-size: 18px;
+          color: #fff;
+          letter-spacing: -0.03em;
+        }
+
+        .synth-sub {
+          font-size: 10px;
+          color: #555;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          margin-top: 3px;
+        }
+
+        .synth-output {
+          padding: 32px;
+          font-size: 12.5px;
+          line-height: 1.8;
+          color: #444;
+          overflow-y: auto;
+          max-height: 700px;
+        }
+
+        .synth-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 80px 40px;
+          gap: 16px;
+          color: #CCC;
+          text-align: center;
+        }
+
+        .synth-placeholder .big {
+          font-family: 'Syne', sans-serif;
+          font-size: 48px;
+          font-weight: 900;
+          color: #E8E6E0;
+          letter-spacing: -0.04em;
+        }
+
+        .synth-placeholder .label {
+          font-family: 'Syne', sans-serif;
+          font-size: 18px;
+          font-weight: 800;
+          color: #CCC;
+          letter-spacing: -0.03em;
+        }
+
+        .synth-placeholder .sub {
+          font-size: 11px;
+          color: #CCC;
+          max-width: 360px;
+          line-height: 1.6;
+        }
+
+        /* Color swatches */
+        .swatches-row {
+          display: flex;
+          gap: 8px;
+          padding: 16px 32px;
+          background: #F5F3EE;
+          border-bottom: 1px solid #E0DDD6;
+          align-items: center;
+          overflow-x: auto;
+        }
+
+        .swatch-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+          flex-shrink: 0;
+        }
+
+        .swatch-color {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .swatch-name {
+          font-size: 8px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #888;
+        }
+
+        .swatch-hex {
+          font-size: 8px;
+          color: #AAA;
+        }
+
+        .swatches-label {
+          font-size: 9px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #AAA;
+          margin-right: 8px;
+          white-space: nowrap;
+        }
+
+        .cursor-blink {
+          display: inline-block;
+          width: 2px;
+          height: 1em;
+          background: #B8FF47;
+          margin-left: 2px;
+          animation: blink 0.7s infinite;
+          vertical-align: middle;
+        }
+      `}</style>
+
+      {/* TOP BAR */}
+      <div className="topbar">
+        <div className="logo">
+          <div className="logo-mark">FL</div>
+          <div>
+            <div className="logo-text">FLOW</div>
+            <div className="logo-phase">AI Program Manager</div>
+          </div>
+        </div>
+        <div className="phase-pill">Phase 02 — Visual Identity</div>
+        <button
+          className="launch-btn"
+          onClick={runPipeline}
+          disabled={phase === "running" || phase === "synthesis"}
+        >
+          {phase === "idle" ? "▶ LAUNCH AGENTS"
+            : phase === "running" ? "⟳ AGENTS WORKING..."
+            : phase === "synthesis" ? "⟳ SYNTHESIZING..."
+            : "↺ RE-RUN PIPELINE"}
+        </button>
+      </div>
+
+      {/* PIPELINE STATUS */}
+      <div className="pipeline-bar">
+        {[
+          { id: "artDirector", label: "Art Director" },
+          { id: "brandStrategist", label: "Brand Strategist" },
+          { id: "brandDesigner", label: "Brand Designer" },
+          { id: "synthesizer", label: "Master Brief" },
+        ].map((step, i) => {
+          const status = statuses[step.id];
+          const isActive = activeAgent === step.id;
+          const isDone = status === "done";
+          return (
+            <div key={step.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {i > 0 && <span className="pip-arrow">›</span>}
+              <div className={`pip-step ${isActive ? "active" : isDone ? "done" : ""}`}>
+                <div className={`pip-dot ${isActive ? "active" : isDone ? "done" : ""}`} />
+                <span className="pip-label">{step.label}</span>
+              </div>
+            </div>
+          );
+        })}
+        {phase === "done" && (
+          <div style={{ marginLeft: "auto", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#B8FF47" }}>
+            ✓ BRIEF COMPLETE — READY TO BUILD DECK
+          </div>
+        )}
+      </div>
+
+      {/* HERO — only shown at idle */}
+      {phase === "idle" && (
+        <div className="hero">
+          <div className="hero-kicker">Multi-Agent Creative System · Phase 02</div>
+          <h1 className="hero-title">
+            Three agents.<br />
+            One <span className="accent">visual identity.</span>
+          </h1>
+          <p className="hero-sub">
+            The Art Director sets creative direction. The Brand Strategist builds the narrative. 
+            The Brand Designer locks the specs. Together they produce the complete Phase 2 
+            Visual Identity brief — ready to build into a deck.
+          </p>
+        </div>
+      )}
+
+      {/* COLOR REFERENCE STRIP */}
+      <div className="swatches-row">
+        <span className="swatches-label">Proposed Palette</span>
+        {colorSwatches.map((s) => (
+          <div key={s.name} className="swatch-item">
+            <div className="swatch-color" style={{ background: s.hex }} />
+            <span className="swatch-name">{s.name}</span>
+            <span className="swatch-hex">{s.hex}</span>
+          </div>
+        ))}
+        <div style={{ marginLeft: "auto", fontSize: "9px", color: "#AAA", letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+          Inspired by reference image ↑
+        </div>
+      </div>
+
+      {/* AGENT PANELS */}
+      <div className="main-grid">
+        {[AGENTS.artDirector, AGENTS.brandStrategist, AGENTS.brandDesigner].map((agent) => {
+          const status = statuses[agent.id];
+          const isRunning = status === "running";
+          const isDone = status === "done";
+          const output = outputs[agent.id];
+
+          return (
+            <div key={agent.id} className="agent-card">
+              {isRunning && (
+                <div className="agent-progress">
+                  <div className="agent-progress-bar" />
+                </div>
+              )}
+
+              <div className="agent-card-header">
+                <div
+                  className="agent-avatar"
+                  style={{
+                    background: isDone || isRunning ? agent.color : "#E8E6E0",
+                    color: agent.textColor,
+                    borderColor: isDone || isRunning ? agent.color : "#E0DDD6",
+                  }}
+                >
+                  {agent.avatar}
+                </div>
+                <div className="agent-info">
+                  <div className="agent-name">{agent.name}</div>
+                  <div className="agent-title">{agent.title}</div>
+                </div>
+                <div className={`status-badge status-${status}`}>
+                  {statusLabel[status]}
+                </div>
+              </div>
+
+              <div
+                className="agent-output"
+                ref={(el) => (scrollRefs.current[agent.id] = el)}
+              >
+                {status === "waiting" ? (
+                  <div className="waiting-state">
+                    <div className="w-circle">
+                      {agent.id === "artDirector" ? "🎨"
+                        : agent.id === "brandStrategist" ? "📐"
+                        : "✏️"}
+                    </div>
+                    <div className="waiting-label">Awaiting activation</div>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      style={{ fontSize: "11.5px", lineHeight: 1.75, color: "#444" }}
+                      dangerouslySetInnerHTML={{ __html: renderMd(output, agent.color === "#F5F3EE" ? "#0A0A0A" : agent.color) }}
+                    />
+                    {isRunning && <span className="cursor-blink" />}
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* INTER-AGENT MESSAGE LOG */}
+      <div className="log-panel">
+        <div className="log-header">
+          <div>
+            <div className="log-title">Agent Communication Log</div>
+            <div className="log-sub">Real-time coordination between agents</div>
+          </div>
+          <div style={{ fontSize: "9px", color: "#333", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+            {messages.length} messages
+          </div>
+        </div>
+        <div className="log-feed" ref={logRef}>
+          {messages.length === 0 ? (
+            <div style={{ color: "#333", fontSize: "11px", textAlign: "center", padding: "20px" }}>
+              Agent communication will appear here once the pipeline launches.
+            </div>
+          ) : (
+            messages.map((msg, i) => {
+              const fromColors = {
+                "SYSTEM": { bg: "#1a1a1a", color: "#666" },
+                "artDirector": { bg: "#B8FF47", color: "#0A0A0A" },
+                "brandStrategist": { bg: "#0A0E27", color: "#fff" },
+                "brandDesigner": { bg: "#FF6B35", color: "#fff" },
+              };
+              const fc = fromColors[msg.from] || { bg: "#222", color: "#888" };
+              const typeColors = {
+                system: "#333",
+                handoff: "#B8FF47",
+                status: "#555",
+                brief: "#444",
+              };
+              return (
+                <div key={i} className="log-entry">
+                  <span
+                    className="log-from"
+                    style={{ background: fc.bg, color: fc.color }}
+                  >
+                    {msg.from === "SYSTEM" ? "SYS" : msg.from === "artDirector" ? "AD" : msg.from === "brandStrategist" ? "BS" : "BD"}
+                  </span>
+                  <span className="log-arrow">→</span>
+                  <span className="log-to" style={{ color: typeColors[msg.type] }}>{msg.to}</span>
+                  <span className="log-msg">{msg.content}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* SYNTHESIS OUTPUT */}
+      <div className="synth-panel">
+        <div className="synth-header">
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div className="synth-icon">⚡</div>
+            <div>
+              <div className="synth-title">Phase 2 Master Brief</div>
+              <div className="synth-sub">Lead Creative Producer — Unified Output</div>
+            </div>
+          </div>
+          {statuses.synthesizer === "running" && (
+            <div style={{ fontSize: "10px", color: "#B8FF47", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              SYNTHESIZING
+            </div>
+          )}
+          {statuses.synthesizer === "done" && (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+              <div style={{ fontSize: "10px", color: "#B8FF47", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                ✓ BRIEF LOCKED
+              </div>
+              <div style={{ fontSize: "9px", color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                Ready → Build Deck
+              </div>
+            </div>
+          )}
+        </div>
+
+        {statuses.synthesizer === "waiting" ? (
+          <div className="synth-placeholder">
+            <div className="big">02</div>
+            <div className="label">Awaiting Agent Pipeline</div>
+            <div className="sub">Once all three agents align on creative direction, strategy, and design specs — the unified Phase 2 brief will be synthesized here.</div>
+          </div>
+        ) : (
+          <div
+            className="synth-output"
+            ref={(el) => (scrollRefs.current.synthesizer = el)}
+          >
+            <div
+              dangerouslySetInnerHTML={{ __html: renderMd(outputs.synthesizer, "#B8FF47") }}
+            />
+            {statuses.synthesizer === "running" && <span className="cursor-blink" />}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
