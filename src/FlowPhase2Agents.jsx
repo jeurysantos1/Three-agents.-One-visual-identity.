@@ -256,7 +256,6 @@ export default function FlowPhase2Agents() {
     brandDesigner:   { completed: 0, active: null },
     synthesizer:     { completed: 0, active: null },
   });
- // ── Human + Co-Working UI state ───────────────────────────────
 
 const [coWorkingOpen, setCoWorkingOpen] = useState(false);
 const [lastSeenMsgId, setLastSeenMsgId] = useState(null);
@@ -268,7 +267,14 @@ const unreadCount = (() => {
   if (idx === -1) return messages.length;
   return Math.max(0, messages.length - (idx + 1));
 })();
-  // ── Human + Co-Working UI state ───────────────────────────────
+  
+
+function openCoWorking() {
+  setCoWorkingOpen(true);
+  const last = messages[messages.length - 1];
+  if (last?.id) setLastSeenMsgId(last.id);
+}
+// ── Human + Co-Working UI state ───────────────────────────────
 
   const [expandedOutput, setExpandedOutput] = useState({});
 
@@ -607,6 +613,25 @@ const unreadCount = (() => {
           </div>
         )}
       </div>
+
+      {/* HUMAN + CO-WORKING (Floating button + message center) */}
+      <CoWorkingFab
+        isVisible={phase !== "idle"}
+        isOpen={coWorkingOpen}
+        onClick={() => (coWorkingOpen ? setCoWorkingOpen(false) : openCoWorking())}
+        phase={phase}
+        error={error}
+        statuses={statuses}
+        unreadCount={coWorkingOpen ? 0 : unreadCount}
+      />
+
+      <CoWorkingDrawer
+        open={coWorkingOpen}
+        onClose={() => setCoWorkingOpen(false)}
+        messages={messages}
+        accent={AGENTS.artDirector?.color || "#B8FF47"}
+      />
+
 
     </div>
   );
