@@ -260,6 +260,17 @@ export default function FlowPhase2Agents() {
     brandDesigner:   { completed: 0, active: null },
     synthesizer:     { completed: 0, active: null },
   });
+const {
+  versions,
+  approvedVersion,
+  saveDraft,
+  approveVersion,
+  deleteVersion,
+  exportJson,
+} = useVersions();
+
+const [saveOpen, setSaveOpen] = useState(false);
+const [versionsOpen, setVersionsOpen] = useState(false);
 
 const [coWorkingOpen, setCoWorkingOpen] = useState(false);
 const [lastSeenMsgId, setLastSeenMsgId] = useState(null);
@@ -293,6 +304,32 @@ function openCoWorking() {
   const scrollOutput = (id) => {
     if (scrollRefs.current[id]) scrollRefs.current[id].scrollTop = scrollRefs.current[id].scrollHeight;
   };
+
+  function buildSnapshot() {
+  // Replace these with YOUR actual variables if names differ:
+  // - userPrompt (or whatever holds the user input)
+  // - outputs (or your output states)
+  return {
+    inputs: {
+      userPrompt: userPrompt || "", // <-- update if your variable name differs
+      agentConfig: { /* optional */ },
+    },
+    outputs: {
+      artDirector: agentOutputs?.artDirector || "",
+      brandStrategist: agentOutputs?.brandStrategist || "",
+      brandDesigner: agentOutputs?.brandDesigner || "",
+      synthesizer: agentOutputs?.synthesizer || "",
+      systemOutput: outputLocked || output || "", // or wherever your “system/synthesis” lives
+    },
+    messages: messages || [],
+    synthesis: {
+      decisions: [], // optional; you can later parse messages into decisions
+      rationale: "",
+      nextSteps: [],
+    },
+  };
+}
+
 
   async function animateSteps(agentId) {
     const total = AGENT_STEPS[agentId]?.length || 0;
