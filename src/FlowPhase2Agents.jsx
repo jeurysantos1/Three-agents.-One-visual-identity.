@@ -691,20 +691,28 @@ function openCoWorking() {
       />
 
       {/* VERSIONS (Save + Approve + Resume) */}
-      <SaveVersionModal
-        open={saveOpen}
-        onClose={() => setSaveOpen(false)}
-        defaultName={
-          statuses.synthesizer === "done"
-            ? "Phase 2 Master Brief — baseline"
-            : `Draft — ${new Date().toLocaleDateString()}`
-        }
-        onSave={({ name, notes, approve }) => {
-          const v = saveDraft({ name, notes, snapshot: buildSnapshot() });
-          setSaveOpen(false);
-          if (approve) approveVersion(v.id);
-        }}
-      />
+     <SaveVersionModal
+  open={saveOpen}
+  onClose={() => setSaveOpen(false)}
+  preview={{
+    hasArtDirector: !!outputs?.artDirector,
+    hasBrandStrategist: !!outputs?.brandStrategist,
+    hasBrandDesigner: !!outputs?.brandDesigner,
+    hasSynthesizer: !!outputs?.synthesizer,
+    hasMasterBrief: !!(outputs?.systemOutput || outputs?.masterBrief),
+    hasMessages: Array.isArray(messages) && messages.length > 0,
+  }}
+  onSave={({ name, notes, approve }) => {
+    const v = saveDraft({ name, notes, snapshot: buildSnapshot() });
+    setSaveOpen(false);
+
+    if (approve) {
+      const approved = approveVersion(v.id);
+      // (optional) baseline mode hook — only if you already added it:
+      // setApprovedBaseline(approved || v);
+    }
+  }}
+/>
 
       <VersionsDrawer
         open={versionsOpen}
