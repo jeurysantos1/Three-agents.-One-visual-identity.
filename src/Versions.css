@@ -302,3 +302,94 @@
 .vv-empty__icon{ font-size: 28px; margin-bottom: 10px; opacity: 0.8; }
 .vv-empty__title{ font-size: 13px; font-weight: 700; }
 .vv-empty__sub{ font-size: 12px; margin-top: 6px; opacity: 0.75; }
+
+
+/* ================================
+   M3 Expressive Chips (Versions)
+   ================================ */
+.vv-section{
+  margin-bottom: 12px;
+}
+.vv-section__label{
+  font-size: 11px;
+  font-weight: 800;
+  opacity: .72;
+  margin-bottom: 8px;
+  letter-spacing: .02em;
+}
+
+.vv-chipRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  align-items:center;
+}
+
+.vv-chip{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.02);
+  user-select:none;
+  transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
+}
+.vv-chip .ms{
+  font-size: 18px;
+  opacity: .88;
+}
+
+.vv-chip--tonal{
+  background: rgba(0,0,0,0.04);
+}
+.vv-chip--approve{
+  background: rgba(0,201,123,0.12);
+  border-color: rgba(0,201,123,0.28);
+}
+
+.vv-chip--link{
+  text-decoration:none;
+  cursor:pointer;
+  background: rgba(66,133,244,0.10);
+  border-color: rgba(66,133,244,0.22);
+}
+.vv-chip--link:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+.vv-chip:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+.vv-chip--sm{
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.vv-chipRow--compact{
+  margin-top: 10px;
+}
+
+@media (prefers-color-scheme: dark){
+  .vv-chip{
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.92);
+  }
+  .vv-chip--tonal{
+    background: rgba(255,255,255,0.08);
+  }
+  .vv-chip--approve{
+    background: rgba(0,201,123,0.16);
+    border-color: rgba(0,201,123,0.30);
+  }
+  .vv-chip--link{
+    background: rgba(66,133,244,0.16);
+    border-color: rgba(66,133,244,0.30);
+  }
+}
