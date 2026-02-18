@@ -8,15 +8,34 @@ function fmt(ts) {
   }
 }
 
+function artifactChipsFromVersion(v) {
+  const o = v?.outputs || {};
+  const chips = [];
+
+  // These keys match your snapshot outputs in FlowPhase2Agents (safe if missing)
+  if (o.artDirector) chips.push({ key: "ad", label: "Art Director", icon: "palette" });
+  if (o.brandStrategist) chips.push({ key: "bs", label: "Strategist", icon: "strategy" });
+  if (o.brandDesigner) chips.push({ key: "bd", label: "Designer", icon: "draw" });
+  if (o.synthesizer) chips.push({ key: "cp", label: "Synth", icon: "hub" });
+
+  // Master brief: support either systemOutput or masterBrief (future-proof)
+  if (o.systemOutput || o.masterBrief) chips.push({ key: "mb", label: "Master brief", icon: "description" });
+
+  // Log
+  if (Array.isArray(v?.messages) && v.messages.length) chips.push({ key: "log", label: "Log", icon: "forum" });
+
+  return chips;
+}
+
 export default function VersionsDrawer({
   open,
   onClose,
   versions = [],
   approvedVersionId = null,
-  onLoad,     // (version) => void
-  onApprove,  // (id) => void
-  onDelete,   // (id) => void
-  onExport,   // () => string
+  onLoad, // (version) => void
+  onApprove, // (id) => void
+  onDelete, // (id) => void
+  onExport, // () => string
 }) {
   const [filter, setFilter] = useState("all");
 
@@ -45,7 +64,7 @@ export default function VersionsDrawer({
             <h2 className="vv-header__title">Versions</h2>
           </div>
 
-          <button className="vv-iconBtn" onClick={onClose} aria-label="Close">
+          <button className="vv-iconBtn" onClick={onClose} aria-label="Close" type="button">
             <span className="ms" aria-hidden="true">
               close
             </span>
@@ -100,6 +119,8 @@ export default function VersionsDrawer({
             <ul className="vv-list">
               {filtered.map((v) => {
                 const isApproved = v.status === "approved" || v.id === approvedVersionId;
+                const chips = artifactChipsFromVersion(v);
+
                 return (
                   <li key={v.id} className={`vv-item ${isApproved ? "vv-item--approved" : ""}`}>
                     <div className="vv-item__main">
@@ -108,24 +129,46 @@ export default function VersionsDrawer({
                         {isApproved && <span className="vv-pill">Approved</span>}
                         {!isApproved && <span className="vv-pill vv-pill--muted">Draft</span>}
                       </div>
+
                       <div className="vv-item__meta">{fmt(v.createdAt)}</div>
+
+                      {/* M3 chips: what was saved */}
+                      {chips.length ? (
+                        <div className="vv-chipRow vv-chipRow--compact" aria-label="Saved artifacts">
+                          {chips.map((c) => (
+                            <span className="vv-chip vv-chip--tonal vv-chip--sm" key={`${v.id}-${c.key}`}>
+                              <span className="ms" aria-hidden="true">{c.icon}</span>
+                              {c.label}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
                       {v.notes ? <div className="vv-item__notes">{v.notes}</div> : null}
+
+                      {/* Optional doc link (future): v.docUrl */}
+                      {v.docUrl ? (
+                        <a className="vv-chip vv-chip--link vv-chip--sm" href={v.docUrl} target="_blank" rel="noreferrer">
+                          <span className="ms" aria-hidden="true">description</span>
+                          Open doc
+                        </a>
+                      ) : null}
                     </div>
 
                     <div className="vv-item__actions">
-                      <button className="vv-iconBtn" onClick={() => onLoad?.(v)} title="Load">
+                      <button className="vv-iconBtn" onClick={() => onLoad?.(v)} title="Load" type="button">
                         <span className="ms" aria-hidden="true">
                           play_arrow
                         </span>
                       </button>
 
-                      <button className="vv-iconBtn" onClick={() => onApprove?.(v.id)} title="Approve">
+                      <button className="vv-iconBtn" onClick={() => onApprove?.(v.id)} title="Approve" type="button">
                         <span className="ms" aria-hidden="true">
                           task_alt
                         </span>
                       </button>
 
-                      <button className="vv-iconBtn" onClick={() => onDelete?.(v.id)} title="Delete">
+                      <button className="vv-iconBtn" onClick={() => onDelete?.(v.id)} title="Delete" type="button">
                         <span className="ms" aria-hidden="true">
                           delete
                         </span>
